@@ -1,58 +1,134 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { StyleSheet, StatusBar } from 'react-native';
+import { createSwitchNavigator, TabNavigator, createStackNavigator, withNavigation, AsyncStorage } from 'react-navigation';
+import { Container, Button, Text, Icon, Footer, FooterTab, StyleProvider } from "native-base";
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import getTheme from './native-base-theme/components';
+import platform from './native-base-theme/variables/platform';
 
-type Props = {};
-export default class App extends Component<Props> {
+import { MainScreen, SettingsScreen, LoginScreen, AuthLoadingScreen } from './app/screens/index';
+
+console.ignoredYellowBox = ['Warning: isMounted(...)', 'Remote debugger'];
+
+const MainStack = createStackNavigator(
+  {
+    Main: MainScreen,
+  },
+  {
+    initialRouteName: 'Main',
+    /* The header config from HomeScreen is now here */
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#00B16A',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    }
+  }
+);
+
+const SettingsStack = createStackNavigator(
+  {
+    Settings: SettingsScreen,
+  },
+  {
+    initialRouteName: 'Settings',
+    /* The header config from HomeScreen is now here */
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#00B16A',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    }
+  }
+);
+
+const TabStack = TabNavigator(
+  {
+    Main: MainStack,
+    Settings: SettingsStack,
+  },
+  {
+    tabBarPosition: "bottom",
+    tabBarComponent: props => {
+      return (
+        <StyleProvider style={getTheme(platform)}>
+          <Footer>
+            <FooterTab>
+              <Button
+                vertical
+                full
+                active={props.navigationState.index === 0}
+                onPress={() => props.navigation.navigate("Main")}>
+                <Icon name="power" />
+                <Text>Lucy</Text>
+              </Button>
+              <Button
+                vertical
+                full
+                active={props.navigationState.index === 1}
+                onPress={() => props.navigation.navigate("Settings")}>
+                <Icon name="briefcase" />
+                <Text>Nine</Text>
+              </Button>
+            </FooterTab>
+          </Footer>
+        </StyleProvider>
+      );
+    }
+  }
+);
+
+const AuthStack = createStackNavigator(
+  {
+    LogIn: LoginScreen,
+  },
+  {
+    initialRouteName: 'LogIn',
+    /* The header config from HomeScreen is now here */
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#00B16A',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  }
+);
+
+const SwitchStack = createSwitchNavigator(
+  {
+    AuthLoading: AuthLoadingScreen,
+    App: TabStack,
+    Auth: AuthStack,
+  },
+  {
+    initialRouteName: 'AuthLoading'
+  }
+);
+
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
+      <Container>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="#00B16A"
+        />
+        <SwitchStack />
+      </Container>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
