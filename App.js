@@ -6,16 +6,44 @@ import { Container, Button, Text, Icon, Footer, FooterTab, StyleProvider } from 
 import getTheme from './native-base-theme/components';
 import platform from './native-base-theme/variables/platform';
 
-import { MainScreen, SettingsScreen, LoginScreen, AuthLoadingScreen } from './app/screens/index';
+import {
+  MainScreen,
+  ChallengeScreen,
+  AddScreen,
+  SettingsScreen,
+  LoginScreen,
+  SignupScreen,
+  AuthVerifyScreen
+} from './app/screens/index';
 
 console.ignoredYellowBox = ['Warning: isMounted(...)', 'Remote debugger'];
 
 const MainStack = createStackNavigator(
   {
     Main: MainScreen,
+    Challenge: ChallengeScreen
   },
   {
     initialRouteName: 'Main',
+    /* The header config from HomeScreen is now here */
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#00B16A',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    }
+  }
+);
+
+const AddStack = createStackNavigator(
+  {
+    Add: AddScreen,
+  },
+  {
+    initialRouteName: 'Add',
     /* The header config from HomeScreen is now here */
     navigationOptions: {
       headerStyle: {
@@ -51,9 +79,11 @@ const SettingsStack = createStackNavigator(
 const TabStack = TabNavigator(
   {
     Main: MainStack,
+    Add: AddStack,
     Settings: SettingsStack,
   },
   {
+    initialRouteName: 'Main',
     tabBarPosition: "bottom",
     tabBarComponent: props => {
       return (
@@ -66,15 +96,20 @@ const TabStack = TabNavigator(
                 active={props.navigationState.index === 0}
                 onPress={() => props.navigation.navigate("Main")}>
                 <Icon name="power" />
-                <Text>Lucy</Text>
               </Button>
               <Button
                 vertical
                 full
                 active={props.navigationState.index === 1}
+                onPress={() => props.navigation.navigate("Add")}>
+                <Icon name="add-circle" />
+              </Button>
+              <Button
+                vertical
+                full
+                active={props.navigationState.index === 2}
                 onPress={() => props.navigation.navigate("Settings")}>
-                <Icon name="briefcase" />
-                <Text>Nine</Text>
+                <Icon name="settings" />
               </Button>
             </FooterTab>
           </Footer>
@@ -87,6 +122,7 @@ const TabStack = TabNavigator(
 const AuthStack = createStackNavigator(
   {
     LogIn: LoginScreen,
+    SignUp: SignupScreen
   },
   {
     initialRouteName: 'LogIn',
@@ -105,12 +141,12 @@ const AuthStack = createStackNavigator(
 
 const SwitchStack = createSwitchNavigator(
   {
-    AuthLoading: AuthLoadingScreen,
+    AuthVerify: AuthVerifyScreen,
     App: TabStack,
     Auth: AuthStack,
   },
   {
-    initialRouteName: 'AuthLoading'
+    initialRouteName: 'AuthVerify'
   }
 );
 

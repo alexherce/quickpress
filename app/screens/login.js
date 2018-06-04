@@ -98,7 +98,7 @@ export class LoginScreen extends Component {
               </Text>
             </Button>
             <Text style={styles.heading2}>¿No tienes cuenta? Es gratis</Text>
-            <Button transparent style={{ marginBottom: 5, alignSelf: "center" }}>
+            <Button transparent style={{ marginBottom: 5, alignSelf: "center" }} onPress={() => this.props.navigation.navigate('SignUp')}>
               <Text style={{ textAlign: "center", fontSize: 18, color: "#000" }}>
                 Crear cuenta
               </Text>

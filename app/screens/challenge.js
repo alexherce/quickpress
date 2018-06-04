@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, StatusBar, Alert, AsyncStorage, View, RefreshControl } from 'react-native';
-import { Container, Header, Content, List, ListItem, Text, Button, Body, Right, Icon, Spinner } from 'native-base';
+import { Platform, StyleSheet, StatusBar, View, Alert } from 'react-native';
+import { Container, Header, Content, List, ListItem, Text, Button, Spinner } from 'native-base';
+import io from 'socket.io-client';
 
 function handleErrors(response) {
   if (response.status == 401) {
@@ -16,41 +17,30 @@ function handleResponse(response) {
   return response;
 }
 
-export class MainScreen extends Component {
+export class ChallengeScreen extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      accessToken: '',
-      challenges: [],
+      accessToken: this.props.navigation.getParam('accessToken', ''),
+      challengeId: this.props.navigation.getParam('id', ''),
+      challenge: {},
       loading: false
     }
   }
 
   static navigationOptions = {
-    title: 'QuickPress',
+    title: 'Challenge',
   };
 
   componentDidMount() {
-    this.getAccessToken();
+    this.getChallenge();
   }
 
-  getAccessToken = async () => {
-    const accessToken = await AsyncStorage.getItem('accessToken');
-
-    if (accessToken) {
-      this.setState({accessToken: accessToken}, () => {
-        this.getChallenges();
-      });
-    } else {
-      this.props.navigation.navigate('AuthVerify');
-    }
-  };
-
-  getChallenges = () => {
+  getChallenge = () => {
     this.setState({loading: true});
 
-    fetch('https://api.herce.co/v1/challenges/list', {
+    fetch('https://api.herce.co/v1/challenges/get/' + this.state.challengeId, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -65,8 +55,9 @@ export class MainScreen extends Component {
       console.log(responseJson);
       this.setState({
         loading: false,
-        challenges: responseJson.challenges
+        challenge: responseJson.challenge
       });
+      this.connectSocket();
     })
     .catch((error) => {
       this.setState({loading: false});
@@ -79,76 +70,70 @@ export class MainScreen extends Component {
     });
   }
 
+  connectSocket = () => {
+    // Creating the socket-client instance will automatically connect to the server.
+    // Query parameters can also be provided, either with the query option
+    // or directly in the url (example: http://localhost/users?token=abc)
+    this.socket = io('https://api.herce.co/live');
+
+    this.socket.on('connect', () => {
+      var room = '1234';
+      // Connected, let's sign-up for to receive messages for this room
+      this.socket.emit('room', {room: room}, function (answer) { console.log(answer); });
+    });
+  }
+
+  sendPress = () => {
+    this.socket.emit('chat', {room: '1234', sender: 'alex', message: 'Testing from Native'}, function (answer) { console.log(answer); });
+  }
+
   Loading = () => {
     return(
       <View>
         <Spinner size="large" color="#00B16A" />
-        <Text style={styles.heading3}>Cargando tus QuickPress...</Text>
+        <Text style={styles.heading3}>Cargando QuickPress...</Text>
       </View>
-    );
-  }
-
-  List = () => {
-    return(
-      <List>
-        {this.state.challenges.map((option, i)=><ItemList key={i} indx={i + 1} item={option} nav={this.props.navigation} accessToken={this.state.accessToken} />)}
-      </List>
     );
   }
 
   Empty = () => {
     return(
-      <Text style={styles.heading2}>No tienes ningún QuickPress</Text>
+      <Text style={styles.heading2}>No se encontró el QuickPress</Text>
+    );
+  }
+
+  Challenge = () => {
+    return(
+      <View>
+        <Text style={styles.heading2}>{this.state.challenge.name}</Text>
+        <Button style={styles.button} onPress={this.sendPress}>
+          <Text style={{ textAlign: "center", alignSelf: "center" }}>QuickPress</Text>
+        </Button>
+      </View>
     );
   }
 
   InnerContent = () => {
     if (this.state.loading) return <this.Loading/>;
-    if(this.state.challenges.length < 1) {
-      return <this.Empty/>;
+    if(Object.keys(this.state.challenge).length > 0) {
+      return <this.Challenge/>;
     } else {
-      return <this.List/>;
+      return <this.Empty/>;
     }
   }
 
   render() {
     return (
-      <Content style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.loading}
-            onRefresh={this.getChallenges}
-          />
-        }>
+      <Content style={styles.content}>
         <this.InnerContent/>
       </Content>
     );
   }
 }
 
-
-class ItemList extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <ListItem button={true} onPress={() => this.props.nav.navigate('Challenge', {id: this.props.item.id, accessToken: this.props.accessToken})}>
-        <Body>
-          <Text>{this.props.item.name}</Text>
-        </Body>
-        <Right>
-          <Icon name="arrow-forward" />
-        </Right>
-      </ListItem>
-    );
-  }
-}
-
-
 const styles = StyleSheet.create({
   content: {
+    padding: 10,
     backgroundColor: "white"
   },
   heading: {

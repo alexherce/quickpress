@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ActivityIndicator, AsyncStorage, StyleSheet, View, Dimensions } from 'react-native';
 import { Container, Content, Text, Spinner } from 'native-base';
 
-export class AuthLoadingScreen extends Component {
+export class AuthVerifyScreen extends Component {
   constructor(props) {
     super(props);
     this._bootstrapAsync();
@@ -14,7 +14,11 @@ export class AuthLoadingScreen extends Component {
 
     // This will switch to the App screen or Auth screen and this loading
     // screen will be unmounted and thrown away.
-    this.props.navigation.navigate(accessToken ? 'App' : 'Auth');
+    if (accessToken) {
+      this.props.navigation.navigate('App', {accessToken: accessToken});
+    } else {
+      this.props.navigation.navigate('Auth');
+    }
   };
 
   render() {
