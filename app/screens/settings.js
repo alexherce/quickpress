@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, AsyncStorage, SafeAreaView } from 'react-native';
 import { Container, Header, Content, List, ListItem, Text } from 'native-base';
 
 export class SettingsScreen extends Component {
+
+  doLogout = () => {
+    AsyncStorage.removeItem('accessToken')
+    .then(() => this.props.navigation.navigate('AuthVerify'));
+  };
+
   render() {
     return (
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
         <Content>
           <List>
-            <ListItem>
-              <Text>Setting 1</Text>
+            <ListItem button={true} onPress={this.doLogout}>
+              <Text>Log out</Text>
             </ListItem>
             <ListItem>
               <Text>Setting 2</Text>
@@ -21,6 +28,7 @@ export class SettingsScreen extends Component {
             </ListItem>
           </List>
         </Content>
+      </SafeAreaView>
     );
   }
 }

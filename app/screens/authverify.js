@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, AsyncStorage, StyleSheet, View, Dimensions } from 'react-native';
+import { ActivityIndicator, AsyncStorage, StyleSheet, View, Dimensions, SafeAreaView } from 'react-native';
 import { Container, Content, Text, Spinner } from 'native-base';
 
 export class AuthVerifyScreen extends Component {
@@ -24,19 +24,21 @@ export class AuthVerifyScreen extends Component {
   render() {
     const {height: screenHeight} = Dimensions.get('window');
     return (
-      <Container>
-        <Content>
-          <View style={{
-            height: screenHeight,
-            justifyContent: 'center',
-            flex: 1,
-            alignItems: 'center',
-            backgroundColor: '#fff'
-          }}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+        <Container>
+          <Content>
+            <View style={{
+              height: screenHeight,
+              justifyContent: 'center',
+              flex: 1,
+              alignItems: 'center',
+              backgroundColor: '#fff'
+            }}>
             <Spinner size="large" color="#00B16A" />
           </View>
         </Content>
       </Container>
-    );
-  }
+    </SafeAreaView>
+  );
+}
 }

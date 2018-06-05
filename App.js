@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, StatusBar } from 'react-native';
-import { createSwitchNavigator, TabNavigator, createStackNavigator, withNavigation, AsyncStorage } from 'react-navigation';
+import { StyleSheet, StatusBar, SafeAreaView } from 'react-native';
+import { createSwitchNavigator, TabNavigator, createStackNavigator, createBottomTabNavigator, AsyncStorage } from 'react-navigation';
 import { Container, Button, Text, Icon, Footer, FooterTab, StyleProvider } from "native-base";
 
 import getTheme from './native-base-theme/components';
@@ -151,11 +151,6 @@ const SwitchStack = createSwitchNavigator(
 );
 
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
     return (
       <Container>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, StatusBar, Alert, AsyncStorage, View, RefreshControl } from 'react-native';
+import { Platform, StyleSheet, StatusBar, Alert, AsyncStorage, View, RefreshControl, SafeAreaView } from 'react-native';
 import { Container, Header, Content, List, ListItem, Text, Button, Body, Right, Icon, Spinner } from 'native-base';
 
 function handleErrors(response) {
@@ -113,15 +113,17 @@ export class MainScreen extends Component {
 
   render() {
     return (
-      <Content style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.loading}
-            onRefresh={this.getChallenges}
-          />
-        }>
-        <this.InnerContent/>
-      </Content>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+        <Content style={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.loading}
+              onRefresh={this.getChallenges}
+            />
+          }>
+          <this.InnerContent/>
+        </Content>
+      </SafeAreaView>
     );
   }
 }

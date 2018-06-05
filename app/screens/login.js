@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, View, Alert, AsyncStorage } from 'react-native';
+import { Platform, StyleSheet, View, Alert, AsyncStorage, SafeAreaView } from 'react-native';
 import { Container, Header, Content, Form, Item, Input, Label, Button, Text, Spinner } from 'native-base';
 
 function handleErrors(response) {
@@ -13,17 +13,21 @@ export class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      ongoingLogin: false
+      loading: false
     };
   }
 
+  static navigationOptions = {
+    title: 'Iniciar sesión',
+  };
+
   signIn = async (response) => {
-    await AsyncStorage.multiSet([['accessToken', response.token], ['username', response.username], ['email', response.email], ['name', response.name], ['lastName', response.first_last_name]]);
-    this.props.navigation.navigate('AuthLoading');
+    await AsyncStorage.multiSet([['accessToken', response.token], ['username', response.username], ['email', response.email], ['name', response.name], ['lastName', response.first_last_name]])
+    .then(() => this.props.navigation.navigate('AuthVerify'));
   };
 
   doLogin = () => {
-    this.setState({ongoingLogin: true});
+    this.setState({loading: true});
 
     fetch('https://api.herce.co/v1/users/login', {
       method: 'POST',
@@ -44,7 +48,7 @@ export class LoginScreen extends Component {
     })
     .catch((error) => {
       console.log(error);
-      this.setState({ongoingLogin: false});
+      this.setState({loading: false});
       Alert.alert(
         'Ocurrió un problema',
         error.toString(),
@@ -54,14 +58,18 @@ export class LoginScreen extends Component {
     });
   }
 
-  static navigationOptions = {
-    title: 'Iniciar sesión',
-  };
+  Loading = () => {
+    return(
+      <View>
+        <Spinner size="large" color="#00B16A" />
+        <Text style={styles.heading3}>Iniciando sesión...</Text>
+      </View>
+    );
+  }
 
-  render() {
-    return (
-      <Content style={styles.content}>
-        <Text style={styles.heading}>Bienvenido</Text>
+  SignIn = () => {
+    return(
+      <View>
         <Form>
           <Item floatingLabel>
             <Label>Usuario</Label>
@@ -81,31 +89,37 @@ export class LoginScreen extends Component {
             />
           </Item>
         </Form>
+        <Button rounded style={styles.button} onPress={this.doLogin}>
+          <Text style={{ textAlign: "center", alignSelf: "center" }}>Iniciar sesión</Text>
+        </Button>
+        <Button transparent style={{ marginBottom: 5, alignSelf: "center" }}>
+          <Text style={{ textAlign: "center", fontSize: 14, color: "#AAA" }}>
+            ¿Olvidaste tu contraseña?
+          </Text>
+        </Button>
+        <Text style={styles.heading2}>¿No tienes cuenta? Es gratis</Text>
+        <Button transparent style={{ marginBottom: 5, alignSelf: "center" }} onPress={() => this.props.navigation.navigate('SignUp')}>
+          <Text style={{ textAlign: "center", fontSize: 18, color: "#000" }}>
+            Crear cuenta
+          </Text>
+        </Button>
+      </View>
+    );
+  }
 
-        {this.state.ongoingLogin ? (
-          <View>
-            <Spinner size="large" color="#00B16A" />
-            <Text style={styles.heading3}>Iniciando sesión...</Text>
-          </View>
-        ) : (
-          <View>
-            <Button style={styles.button} onPress={this.doLogin}>
-              <Text style={{ textAlign: "center", alignSelf: "center" }}>Iniciar sesión</Text>
-            </Button>
-            <Button transparent style={{ marginBottom: 5, alignSelf: "center" }}>
-              <Text style={{ textAlign: "center", fontSize: 14, color: "#AAA" }}>
-                ¿Olvidaste tu contraseña?
-              </Text>
-            </Button>
-            <Text style={styles.heading2}>¿No tienes cuenta? Es gratis</Text>
-            <Button transparent style={{ marginBottom: 5, alignSelf: "center" }} onPress={() => this.props.navigation.navigate('SignUp')}>
-              <Text style={{ textAlign: "center", fontSize: 18, color: "#000" }}>
-                Crear cuenta
-              </Text>
-            </Button>
-          </View>
-        )}
-      </Content>
+  InnerContent = () => {
+    if (this.state.loading) return <this.Loading/>;
+    return <this.SignIn/>;
+  }
+
+  render() {
+    return (
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+        <Content style={styles.content}>
+          <Text style={styles.heading}>Bienvenido</Text>
+          <this.InnerContent/>
+        </Content>
+      </SafeAreaView>
     );
   }
 }
